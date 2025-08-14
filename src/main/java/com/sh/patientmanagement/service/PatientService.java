@@ -1,13 +1,17 @@
 package com.sh.patientmanagement.service;
 
 import com.sh.patientmanagement.dto.PatientRequestDTO;
+import com.sh.patientmanagement.exception.EmailAlreadyException;
+import com.sh.patientmanagement.exception.PatientNotFoundException;
 import com.sh.patientmanagement.mapper.PatientMapper;
 import com.sh.patientmanagement.repository.PatientRepository;
 import com.sh.patientmanagement.dto.PatientResponseDTO;
 import com.sh.patientmanagement.model.Patient;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PatientService {
@@ -21,7 +25,29 @@ public class PatientService {
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO){
+        if(patientRepository.existsByEmail(patientRequestDTO.getEmail())){
+            throw new EmailAlreadyException("Email Already Exists" + "already exists" + patientRequestDTO.getEmail());
+        }
         Patient newPatient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
         return PatientMapper.toDTO(newPatient);
+    }
+
+    public PatientResponseDTO updatePatient(UUID id, PatientRequestDTO patientRequestDTO){
+        Patient patient = patientRepository.findById(id).orElseThrow(()-> new PatientNotFoundException("Patient not found with ID: " + id));
+        if(patientRepository.existsByEmailAndIdNot(patientRequestDTO.getEmail(), id)){
+            throw new EmailAlreadyException("Email Already Exists" + "already exists" + patientRequestDTO.getEmail());
+        }
+        patient.setName(patientRequestDTO.getName());
+        patient.setEmail(patientRequestDTO.getEmail  ()) ;
+        patient.setAddress(patientRequestDTO.getAddress());
+        patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
+
+        Patient updatedPatient = patientRepository.save(patient);
+
+        return PatientMapper.toDTO(updatedPatient);
+    }
+
+    public void deletePatient(UUID id){
+        patientRepository.deleteById(id);
     }
 }
