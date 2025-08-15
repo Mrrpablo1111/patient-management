@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.sh</groupId>
-    <artifactId>patient-management</artifactId>
+    <artifactId>patient-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>patient-management</name>
     <description>patient-management</description>
